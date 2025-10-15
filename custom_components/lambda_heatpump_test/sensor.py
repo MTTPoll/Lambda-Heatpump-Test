@@ -11,7 +11,11 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.helpers.entity import DeviceInfo
 
 from pymodbus.client import ModbusTcpClient
-from pymodbus.version import version as pymodbus_version
+try:
+    from pymodbus.version import version as pymodbus_version
+except Exception:
+    import pymodbus as _pm
+    pymodbus_version = getattr(_pm, '__version__', 'unknown')
 
 from .lambda_heatpump_test_api import *  # reuse original API helpers if referenced
 
