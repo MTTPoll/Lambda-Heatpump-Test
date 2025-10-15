@@ -165,7 +165,7 @@ def to_signed_16(v: int) -> int:
     return v - 0x10000 if (v & 0x8000) else v
 
 class ModbusClientManager:
-    def __init__(self, ip_address: str, word_order: str = \"big\", unit_id: int = 1):
+    def __init__(self, ip_address: str, word_order: str = "big", unit_id: int = 1):
         self.client = ModbusTcpClient(ip_address)
         self.word_order = word_order
         self.unit_id = unit_id
