@@ -169,7 +169,7 @@ class ModbusClientManager:
         self.client = ModbusTcpClient(ip_address)
         self.word_order = word_order
         self.unit_id = unit_id
-        _LOGGER.info(\"Lambda Heatpump Test: using pymodbus %s, word_order=%s, unit_id=%s\", pymodbus_version, word_order, unit_id)
+        _LOGGER.info("Lambda Heatpump Test: using pymodbus %s, word_order=%s, unit_id=%s", pymodbus_version, word_order, unit_id)
 
     def connect(self):
         self.client.connect()
@@ -181,7 +181,14 @@ class ModbusClientManager:
             pass
 
     def read_u16_block(self, start_register: int, count: int):
-        rr = self.client.read_holding_registers(start_register, count, unit=self.unit_id)
+        # Support different pymodbus kwarg names across versions
+        try:
+            rr = self.client.read_holding_registers(start_register, count, unit=self.unit_id)
+        except TypeError:
+            try:
+                rr = self.client.read_holding_registers(start_register, count=count, device_id=self.unit_id)
+            except TypeError:
+                rr = self.client.read_holding_registers(start_register, count=count, slave=self.unit_id)
         if getattr(rr, "isError", lambda: False)():
             raise UpdateFailed(f"Modbus error reading {{start_register}}+{{count}}: {{rr}}")
         return rr.registers
@@ -237,7 +244,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     word_order = entry.data.get("word_order", "big")  # before 2025 -> big, after 2025 -> little
     update_interval = timedelta(seconds=entry.data.get("update_interval", 30))
 
-    unit_id = entry.data.get(\"unit_id\", 1)
+    unit_id = entry.data.get("unit_id", 1)
     client = ModbusClientManager(ip_address, word_order, unit_id)
     client.connect()
 
