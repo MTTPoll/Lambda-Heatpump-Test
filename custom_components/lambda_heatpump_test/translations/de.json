@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Lambda Wärmepumpe (Test)",
+        "description": "Bitte Verbindung und Einstellungen angeben",
+        "data": {
+          "ip_address": "IP-Adresse",
+          "update_interval": "Aktualisierungsintervall (Sekunden)",
+          "installed_before_2025": "Wurde das Gerät vor 2025 eingebaut?",
+          "has_heat_circuit_2": "Heizkreis 2 vorhanden",
+          "has_heat_circuit_3": "Heizkreis 3 vorhanden"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen"
+    }
+  }
+}

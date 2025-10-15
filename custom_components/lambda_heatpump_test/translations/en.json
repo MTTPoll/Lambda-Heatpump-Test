@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Lambda Heatpump (Test)",
+        "description": "Please provide connection and settings",
+        "data": {
+          "ip_address": "IP address",
+          "update_interval": "Update interval (seconds)",
+          "installed_before_2025": "Was the unit installed before 2025?",
+          "has_heat_circuit_2": "Has heat circuit 2",
+          "has_heat_circuit_3": "Has heat circuit 3"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Connection failed"
+    }
+  }
+}
