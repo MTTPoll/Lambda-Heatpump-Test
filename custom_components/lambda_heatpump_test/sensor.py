@@ -2,6 +2,7 @@
 from __future__ import annotations
 from datetime import timedelta
 from typing import Any, Dict, List
+import asyncio
 import logging
 
 from homeassistant.components.sensor import SensorEntity
@@ -164,10 +165,11 @@ def to_signed_16(v: int) -> int:
     return v - 0x10000 if (v & 0x8000) else v
 
 class ModbusClientManager:
-    def __init__(self, ip_address: str, word_order: str = "big"):
+    def __init__(self, ip_address: str, word_order: str = \"big\", unit_id: int = 1):
         self.client = ModbusTcpClient(ip_address)
         self.word_order = word_order
-        _LOGGER.info("Lambda Heatpump Test: using pymodbus %s, word_order=%s", pymodbus_version, word_order)
+        self.unit_id = unit_id
+        _LOGGER.info(\"Lambda Heatpump Test: using pymodbus %s, word_order=%s, unit_id=%s\", pymodbus_version, word_order, unit_id)
 
     def connect(self):
         self.client.connect()
@@ -179,7 +181,7 @@ class ModbusClientManager:
             pass
 
     def read_u16_block(self, start_register: int, count: int):
-        rr = self.client.read_holding_registers(start_register, count, unit=1)
+        rr = self.client.read_holding_registers(start_register, count, unit=self.unit_id)
         if getattr(rr, "isError", lambda: False)():
             raise UpdateFailed(f"Modbus error reading {{start_register}}+{{count}}: {{rr}}")
         return rr.registers
@@ -235,7 +237,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     word_order = entry.data.get("word_order", "big")  # before 2025 -> big, after 2025 -> little
     update_interval = timedelta(seconds=entry.data.get("update_interval", 30))
 
-    client = ModbusClientManager(ip_address, word_order)
+    unit_id = entry.data.get(\"unit_id\", 1)
+    client = ModbusClientManager(ip_address, word_order, unit_id)
     client.connect()
 
     async def async_update_data():
@@ -244,7 +247,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             for spec in SENSORS:
                 name = spec.get("name", "sensor")
                 try:
-                    data[name] = client.read_spec(spec)
+                    data[name] = await hass.async_add_executor_job(client.read_spec, spec)
                 except Exception as sensor_err:
                     _LOGGER.debug("Read failed for %s: %s", name, sensor_err)
                     data.setdefault(name, None)

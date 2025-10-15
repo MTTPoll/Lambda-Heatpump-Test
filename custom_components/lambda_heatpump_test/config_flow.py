@@ -18,6 +18,7 @@ class LambdaHeatpumpTestConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("installed_before_2025", default=False): cv.boolean,
             vol.Optional("has_heat_circuit_2", default=True): cv.boolean,
             vol.Optional("has_heat_circuit_3", default=True): cv.boolean,
+                vol.Optional("unit_id", default=1): vol.All(vol.Coerce(int), vol.Range(min=0, max=255)),
         })
 
         if user_input is None:
@@ -31,6 +32,7 @@ class LambdaHeatpumpTestConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             "has_heat_circuit_2": user_input.get("has_heat_circuit_2", True),
             "has_heat_circuit_3": user_input.get("has_heat_circuit_3", True),
             "word_order": word_order,
+                "unit_id": user_input.get("unit_id", 1),
         }
         title = f"Lambda Heatpump Test ({user_input['ip_address']})"
         return self.async_create_entry(title=title, data=data)
